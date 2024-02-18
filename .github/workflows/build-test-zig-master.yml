@@ -24,7 +24,9 @@ jobs:
       - name: Run actions/cache@v4 (zig build cache)
         uses: actions/cache@v4
         with:
-          path: zig-cache
+          path: |
+            zig-cache
+            ~\AppData\Local\zig
           key: ${{ runner.os }}-${{ runner.arch }}-zig-cache
       - run: zig build test --summary all
   lint:
