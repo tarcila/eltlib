@@ -1,0 +1,26 @@
+.{
+    .name = "eltlib",
+    .version = "0.0.0",
+    .minimum_zig_version = "0.11.0",
+
+    .dependencies = .{
+        .sdl3 = .{ .path = "vendor/sdl3" },
+        .@"mach-objc" = .{
+            .url = "https://github.com/hexops/mach-objc/archive/2b2a698e7f019e1599edb3eda4a974fa1fb07483.tar.gz",
+            .hash = "1220d708af437c2076d1a0482ac745b3c4507f4f41cc9f248ee78a3c297c41ee7c33",
+        },
+        .zalgebra = .{
+            .url = "https://github.com/kooparse/zalgebra/archive/27013efdea89e6f9b838b088e916fe7e55a828fa.tar.gz",
+            .hash = "1220f4d39ae8a024b01bc4a141ccff9a410140a6f3630475b28f8ade34058eb1edb3",
+        },
+    },
+
+    .paths = .{
+        "LICENSE",
+        "build.zig",
+        "build.zig.zon",
+        "lib",
+        "src",
+        "vendor",
+    },
+}
