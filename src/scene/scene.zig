@@ -7,7 +7,6 @@ pub const MaterialName = enum(u32) {
 
 pub const PhongDescriptor = extern struct {
     diffuse_color: zalgebra.Vec3,
-    // diffuse_texture: *anyopaque,
 };
 
 pub const Material = extern struct {

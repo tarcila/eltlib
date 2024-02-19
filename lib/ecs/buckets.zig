@@ -344,13 +344,13 @@ pub fn DbBucket(comptime ComponentsInDb: []const type, comptime settings: DbBuck
             _ = try self.do_slice(self, signature, bucket_index, &u8_ptrs);
 
             var cs: Slice(Components) = undefined;
-            inline for (Components, 0..) |C, target_index| {
-                const db_index = try ComponentsDb.getComponentIndex(C);
+            inline for (Components, 0..) |Component, target_index| {
+                const db_index = try ComponentsDb.getComponentIndex(Component);
                 const db_component_mask = std.math.shl(ComponentsDb.ComponentsSignature, 1, db_index);
 
                 const component_before_mask = db_component_mask - 1;
                 const source_index = @popCount(signature & component_before_mask);
-                const ptr = @as([*]C, @ptrCast(@alignCast(u8_ptrs[source_index])));
+                const ptr = @as([*]Component, @ptrCast(@alignCast(u8_ptrs[source_index])));
                 cs[target_index] = ptr[0..settings.bucket_size];
             }
 
