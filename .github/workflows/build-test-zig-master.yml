@@ -27,6 +27,7 @@ jobs:
           path: |
             zig-cache
             ~\AppData\Local\zig
+            ~/.cache/zig
           key: ${{ runner.os }}-${{ runner.arch }}-zig-cache
       - run: zig build test --summary all
   lint:
