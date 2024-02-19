@@ -46,7 +46,7 @@ pub fn build(b: *std.Build) !void {
     run_step.dependOn(&run_cmd.step);
 
     // Format
-    const fmt_include_paths = &.{ "doc", "lib", "src", "test", "tools", "build.zig" };
+    const fmt_include_paths = &.{ "lib", "src", "build.zig", "build.zig.zon", "vendor/sdl3" };
     const fmt_exclude_paths = &.{};
     const do_fmt = b.addFmt(.{ .paths = fmt_include_paths, .exclude_paths = fmt_exclude_paths });
     b.step("fmt", "Modify source files in place to have conforming formatting")
