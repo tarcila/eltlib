@@ -5,6 +5,9 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // Do not auto install API docs
+    const skip_install_api_docss = b.option(bool, "no-api-docs", "skip copying of standard library autodocs to the installation prefix") orelse false;
+
     // Dependencies
     const mach_objc_dep = b.dependency("mach-objc", .{ .target = target, .optimize = optimize });
     const sdl3_dep = b.dependency("sdl3", .{ .target = target, .optimize = optimize });
@@ -67,4 +70,16 @@ pub fn build(b: *std.Build) !void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
+
+    // Documentation
+    const install_docs_step = b.addInstallDirectory(.{
+        .source_dir = lib_unit_tests.getEmittedDocs(),
+        .install_dir = .prefix,
+        .install_subdir = "doc/",
+    });
+    const doc_step = b.step("api-doc", "Build the API documentation");
+    doc_step.dependOn(&install_docs_step.step);
+    if (!skip_install_api_docss) {
+        b.getInstallStep().dependOn(doc_step);
+    }
 }
