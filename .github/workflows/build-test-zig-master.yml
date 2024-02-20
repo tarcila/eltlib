@@ -35,13 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: goto-bus-stop/setup-zig@v2
-      - run: zig test -femit-docs --test-no-exec -fno-emit-bin ./lib/lib.zig
+      - run: zig build api-doc
       - uses: actions/upload-artifact@v4
         with:
-          name: docs
-          path: docs/
+          name: doc
+          path: zig-out/doc/
           if-no-files-found: error
-
   lint:
     runs-on: ubuntu-latest
     steps:
