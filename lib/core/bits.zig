@@ -284,7 +284,7 @@ test "findFirstBitsSetSequenceAtLeast" {
 }
 
 /// Return the shortest 1 bits sequence in the provided int that is at least min_len bits.
-pub fn findShortestBitsSetSequenceAtLeast(int: anytype, min_len: usize) ?BitRange {
+pub fn findFirstBitsSetSequenceExact(int: anytype, exact_len: usize) ?BitRange {
     const IntType = @TypeOf(int);
     const int_type = @typeInfo(IntType);
     comptime std.debug.assert(int_type == .Int);
@@ -292,7 +292,7 @@ pub fn findShortestBitsSetSequenceAtLeast(int: anytype, min_len: usize) ?BitRang
     // Variation on the above. Combine shift for min_len - 1 iteration.
     // Candidates will be all those blocks with at least one 1.
     var trimmed = int;
-    for (1..min_len) |_| {
+    for (1..exact_len) |_| {
         trimmed &= trimmed >> 1;
     }
 
@@ -311,12 +311,12 @@ pub fn findShortestBitsSetSequenceAtLeast(int: anytype, min_len: usize) ?BitRang
         const start = @ctz(trimmed);
         return .{
             .start = start,
-            .end = start + min_len,
+            .end = start + exact_len,
         };
     }
 }
 
-test "findShortestBitsSetSequenceAtLeast" {
+test "findFirstBitsSetSequenceExact" {
     const tests = [_]struct { input: struct { u8, usize }, expected: ?BitRange }{
         .{ .input = .{ 0b1111_0111, 3 }, .expected = .{ .start = 0, .end = 3 } },
         .{ .input = .{ 0b1110_1111, 3 }, .expected = .{ .start = 5, .end = 8 } },
@@ -324,6 +324,60 @@ test "findShortestBitsSetSequenceAtLeast" {
         .{ .input = .{ 0b1110_1110, 3 }, .expected = .{ .start = 1, .end = 4 } },
         .{ .input = .{ 0b0000_0000, 3 }, .expected = null },
         .{ .input = .{ 0b1111_1111, 8 }, .expected = .{ .start = 0, .end = 8 } },
+    };
+
+    for (tests) |t| {
+        try std.testing.expectEqual(t.expected, findFirstBitsSetSequenceExact(t.input[0], t.input[1]));
+    }
+}
+
+/// Return the shortest 1 bits sequence in the provided int that is at least min_len bits.
+pub fn findShortestBitsSetSequenceAtLeast(int: anytype, min_len: usize) ?BitRange {
+    const IntType = @TypeOf(int);
+    const int_type = @typeInfo(IntType);
+    comptime std.debug.assert(int_type == .Int);
+
+    // Variation on the above. Combine shift for min_len - 1 iteration.
+    // Candidates will be all those blocks with at least one 1.
+    var trimmed = int;
+    for (1..min_len) |_| {
+        trimmed &= trimmed >> 1;
+    }
+
+    while (trimmed != 0) {
+        // Kill the singluar 1s. The remaing 1s are then part of larger blocks of 1s.
+        const mask = trimmed & (trimmed >> 1);
+        // Build another mask to kill those blobs.
+        const combinedmask = mask | (mask << 1);
+
+        // And use that remove all but singular 1s in the trimmed int.
+        // Remaining 1s will be the shortest candidates.
+        const filtered_trimmed = trimmed & ~combinedmask;
+
+        // All singular 1s are valid results. Pick the first one.
+        if (filtered_trimmed != 0) {
+            const start = @ctz(filtered_trimmed);
+            return .{
+                .start = start,
+                .end = start + min_len,
+            };
+        }
+        trimmed &= trimmed >> 1;
+    }
+
+    return null;
+}
+
+test "findShortestBitsSetSequenceAtLeast" {
+    const tests = [_]struct { input: struct { u8, usize }, expected: ?BitRange }{
+        .{ .input = .{ 0b0000_0111, 3 }, .expected = .{ .start = 0, .end = 3 } },
+        .{ .input = .{ 0b1111_0111, 3 }, .expected = .{ .start = 0, .end = 3 } },
+        .{ .input = .{ 0b1110_1111, 3 }, .expected = .{ .start = 5, .end = 8 } },
+        .{ .input = .{ 0b0110_0110, 4 }, .expected = null },
+        .{ .input = .{ 0b1110_1110, 3 }, .expected = .{ .start = 1, .end = 4 } },
+        .{ .input = .{ 0b0000_0000, 3 }, .expected = null },
+        .{ .input = .{ 0b1111_1111, 8 }, .expected = .{ .start = 0, .end = 8 } },
+        .{ .input = .{ 0b1111_1111, 4 }, .expected = .{ .start = 0, .end = 4 } },
     };
 
     for (tests) |t| {
