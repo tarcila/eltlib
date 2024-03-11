@@ -145,6 +145,52 @@ test "endsWithNthBitsSet" {
     }
 }
 
+/// Returns the number of bits set at the begining of the provided int.
+pub fn countBitsSetAtStart(int: anytype) usize {
+    const IntType = @TypeOf(int);
+    const int_type = @typeInfo(IntType);
+
+    comptime std.debug.assert(int_type == .Int);
+
+    // Count the number of leading 0 on ~int
+    return @ctz(~int);
+}
+
+test "countBitsSetAtStart" {
+    const tests = [_]struct { input: u8, expected: usize }{
+        .{ .input = 0b0001_1111, .expected = 5 },
+        .{ .input = 0b0001_1110, .expected = 0 },
+        .{ .input = 0b1111_1111, .expected = 8 },
+    };
+
+    for (tests) |t| {
+        try std.testing.expectEqual(t.expected, countBitsSetAtStart(t.input));
+    }
+}
+
+/// Returns the number of bits set at the end of the provided int.
+pub fn countBitsSetAtEnd(int: anytype) usize {
+    const IntType = @TypeOf(int);
+    const int_type = @typeInfo(IntType);
+
+    comptime std.debug.assert(int_type == .Int);
+
+    // Count the number of trailing 0 on ~int
+    return @clz(~int);
+}
+
+test "countBitsSetAtEnd" {
+    const tests = [_]struct { input: u8, expected: usize }{
+        .{ .input = 0b1111_1000, .expected = 5 },
+        .{ .input = 0b0111_1000, .expected = 0 },
+        .{ .input = 0b1111_1111, .expected = 8 },
+    };
+
+    for (tests) |t| {
+        try std.testing.expectEqual(t.expected, countBitsSetAtEnd(t.input));
+    }
+}
+
 /// Describes a range of bits.
 /// start is inclusive, end is exclusive.
 pub const BitRange = struct {
