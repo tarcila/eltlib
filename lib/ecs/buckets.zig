@@ -131,7 +131,7 @@ pub fn Bucket(comptime ComponentsInBucket: []const type, comptime settings: Buck
         pub fn allocateItems(self: *@This(), count: usize) !usize {
             const maybe_range = bits.findShortestBitsSetSequenceAtLeast(self.bitmap.mask, count);
             if (maybe_range) |range| {
-                self.bitmap.setRangeValue(.{ .start = range.start, .end = range.start + range.len }, false);
+                self.bitmap.setRangeValue(.{ .start = range.start, .end = range.end }, false);
                 return range.start;
             }
             return BucketError.OutOfSpace;

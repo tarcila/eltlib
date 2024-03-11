@@ -116,7 +116,7 @@ test "startsWithNthBitsSet" {
     };
 
     for (tests) |t| {
-        try std.testing.expectEqual(startsWithNthBitsSet(t.input[0], t.input[1]), t.expected);
+        try std.testing.expectEqual(t.expected, startsWithNthBitsSet(t.input[0], t.input[1]));
     }
 }
 
@@ -141,13 +141,15 @@ test "endsWithNthBitsSet" {
     };
 
     for (tests) |t| {
-        try std.testing.expectEqual(endsWithNthBitsSet(t.input[0], t.input[1]), t.expected);
+        try std.testing.expectEqual(t.expected, endsWithNthBitsSet(t.input[0], t.input[1]));
     }
 }
 
-const BitRange = struct {
+/// Describes a range of bits.
+/// start is inclusive, end is exclusive.
+pub const BitRange = struct {
     start: usize,
-    len: usize,
+    end: usize,
 };
 
 /// Return the longest 1 bits sequence in the provided int.
@@ -170,19 +172,21 @@ pub fn findLongestBitsSetSequence(int: anytype) ?BitRange {
 
     if (len == 0)
         return null
-    else
+    else {
+        const start = @ctz(prevtrimmed);
         return .{
-            .start = @ctz(prevtrimmed),
-            .len = len,
+            .start = start,
+            .end = start + len,
         };
+    }
 }
 
 test "findLongestBitsSetSequence" {
     const tests = [_]struct { input: u8, expected: ?BitRange }{
-        .{ .input = 0b1110_1100, .expected = .{ .start = 5, .len = 3 } },
-        .{ .input = 0b1100_1110, .expected = .{ .start = 1, .len = 3 } },
-        .{ .input = 0b1110_1110, .expected = .{ .start = 1, .len = 3 } },
-        .{ .input = 0b1111_1111, .expected = .{ .start = 0, .len = 8 } },
+        .{ .input = 0b1110_1100, .expected = .{ .start = 5, .end = 8 } },
+        .{ .input = 0b1100_1110, .expected = .{ .start = 1, .end = 4 } },
+        .{ .input = 0b1110_1110, .expected = .{ .start = 1, .end = 4 } },
+        .{ .input = 0b1111_1111, .expected = .{ .start = 0, .end = 8 } },
 
         .{ .input = 0, .expected = null },
     };
@@ -207,21 +211,25 @@ pub fn findFirstBitsSetSequenceAtLeast(int: anytype, min_len: usize) ?BitRange {
 
     if (trimmed == 0)
         return null
-    else
+    else {
+        const start = @ctz(trimmed);
         return .{
-            .start = @ctz(trimmed),
-            .len = min_len,
+            .start = start,
+            .end = start + min_len,
         };
+    }
 
     return null;
 }
 
 test "findFirstBitsSetSequenceAtLeast" {
     const tests = [_]struct { input: struct { u8, usize }, expected: ?BitRange }{
-        .{ .input = .{ 0b1110_1100, 3 }, .expected = .{ .start = 5, .len = 3 } },
-        .{ .input = .{ 0b1110_1110, 3 }, .expected = .{ .start = 1, .len = 3 } },
-        .{ .input = .{ 0b0110_1110, 3 }, .expected = .{ .start = 1, .len = 3 } },
+        .{ .input = .{ 0b0000_1111, 3 }, .expected = .{ .start = 0, .end = 3 } },
+        .{ .input = .{ 0b0000_1110, 3 }, .expected = .{ .start = 1, .end = 4 } },
         .{ .input = .{ 0b0110_0110, 3 }, .expected = null },
+        .{ .input = .{ 0b1110_1100, 3 }, .expected = .{ .start = 5, .end = 8 } },
+        .{ .input = .{ 0b1110_1110, 3 }, .expected = .{ .start = 1, .end = 4 } },
+        .{ .input = .{ 0b0110_1110, 3 }, .expected = .{ .start = 1, .end = 4 } },
     };
 
     for (tests) |t| {
@@ -253,21 +261,23 @@ pub fn findShortestBitsSetSequenceAtLeast(int: anytype, min_len: usize) ?BitRang
     // All singular 1s are valid results. Pick the first one.
     if (trimmed == 0)
         return null
-    else
+    else {
+        const start = @ctz(trimmed);
         return .{
-            .start = @ctz(trimmed),
-            .len = min_len,
+            .start = start,
+            .end = start + min_len,
         };
+    }
 }
 
 test "findShortestBitsSetSequenceAtLeast" {
     const tests = [_]struct { input: struct { u8, usize }, expected: ?BitRange }{
-        .{ .input = .{ 0b1111_0111, 3 }, .expected = .{ .start = 0, .len = 3 } },
-        .{ .input = .{ 0b1110_1111, 3 }, .expected = .{ .start = 5, .len = 3 } },
+        .{ .input = .{ 0b1111_0111, 3 }, .expected = .{ .start = 0, .end = 3 } },
+        .{ .input = .{ 0b1110_1111, 3 }, .expected = .{ .start = 5, .end = 8 } },
         .{ .input = .{ 0b0110_0110, 4 }, .expected = null },
-        .{ .input = .{ 0b1110_1110, 3 }, .expected = .{ .start = 1, .len = 3 } },
+        .{ .input = .{ 0b1110_1110, 3 }, .expected = .{ .start = 1, .end = 4 } },
         .{ .input = .{ 0b0000_0000, 3 }, .expected = null },
-        .{ .input = .{ 0b1111_1111, 8 }, .expected = .{ .start = 0, .len = 8 } },
+        .{ .input = .{ 0b1111_1111, 8 }, .expected = .{ .start = 0, .end = 8 } },
     };
 
     for (tests) |t| {
